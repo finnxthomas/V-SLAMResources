@@ -1,104 +1,33 @@
-# obtained from https://gitlab.com/nvidia/container-images/l4t-base/-/blob/master/Dockerfile.l4t
+FROM ubuntu:18.04
+SHELL [ "/bin/bash", "--login", "-c" ]
 
+# install essential tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    curl \
+    ca-certificates \
+    libjpeg-dev \
+    libpng-dev && \
+    rm -rf /var/lib/apt/lists/*
 
+# install ros
+RUN apt-get update && apt-get install ros-melodic
 
-# Copyright (c) 2020, NVIDIA CORPORATION.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-FROM docker.io/arm64v8/ubuntu:18.04
+# install catkin dependencies
+RUN apt-get update && apt-get install python-catkin-pkg python-empy python-nose python-setuptools libgtest-dev
 
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -qq -y --no-install-recommends \
-    bc \
-    bzip2 \
-    can-utils \
-    freeglut3-dev \
-    gstreamer1.0-alsa \
-    gstreamer1.0-libav \
-    gstreamer1.0-plugins-bad \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-plugins-good \
-    gstreamer1.0-plugins-ugly \
-    gstreamer1.0-tools \
-    i2c-tools \
-    iw \
-    kbd \
-    language-pack-en-base \
-    libapt-inst2.0 \
-    libcanberra-gtk3-module \
-    libgles2 \
-    libglu1-mesa-dev \
-    libglvnd-dev \
-    libgtk-3-0 \
-    libpython2.7 \
-    libudev1 \
-    libvulkan1 \
-    libzmq5 \
-    mtd-utils \
-    parted \
-    pciutils \
-    python \
-    python-pexpect \
-    python3-distutils \
-    sox \
-    udev \
-    vulkan-utils \
-    wget \
-    wireless-tools wpasupplicant && \
-    rm -rf /var/lib/apt/lists/* && apt-get clean
+# install catkin
+RUN apt-get update && apt-get install ros-melodic-catkin
 
-RUN echo "/usr/lib/aarch64-linux-gnu/tegra" >> /etc/ld.so.conf.d/nvidia-tegra.conf && \
-    echo "/usr/lib/aarch64-linux-gnu/tegra-egl" >> /etc/ld.so.conf.d/nvidia-tegra.conf
+# create catkin workspace
+RUN mkdir -p /home/catkin_ws/src
+RUN cd ~/catkin_ws/
+WORKDIR /home/catkin_ws
+RUN catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 
-RUN rm /usr/share/glvnd/egl_vendor.d/50_mesa.json
-RUN mkdir -p /usr/share/glvnd/egl_vendor.d/ && echo '\
-    {\
-    "file_format_version" : "1.0.0",\
-    "ICD" : {\
-    "library_path" : "libEGL_nvidia.so.0"\
-    }\
-    }' > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+# install packages/dependencies in catkin workspace
+RUN apt-get update && apt-get install -y python3 ros-melodic-rtabmap ros-melodic-rtabmap-ros ros-$ROS_DISTRO-realsense2-camera rviz
 
-RUN mkdir -p /usr/share/egl/egl_external_platform.d/ && echo '\
-    {\
-    "file_format_version" : "1.0.0",\
-    "ICD" : {\
-    "library_path" : "libnvidia-egl-wayland.so.1"\
-    }\
-    }' > /usr/share/egl/egl_external_platform.d/nvidia_wayland.json
-
-RUN echo "/usr/local/cuda-10.0/targets/aarch64-linux/lib" >> /etc/ld.so.conf.d/nvidia.conf
-
-ARG CUDA=invalid
-
-COPY ./dst/bin /usr/local/cuda-$CUDA/bin
-COPY ./dst/nvvm /usr/local/cuda-$CUDA/nvvm
-COPY ./dst/nvvmx /usr/local/cuda-$CUDA/nvvmx
-COPY ./dst/include /usr/local/cuda-$CUDA/targets/aarch64-linux/include
-COPY ./dst/lib64/stubs /usr/local/cuda-$CUDA/targets/aarch64-linux/lib/stubs
-COPY ./dst/lib64/libcudadevrt.a /usr/local/cuda-$CUDA/targets/aarch64-linux/lib/
-COPY ./dst/lib64/libcudart_static.a /usr/local/cuda-$CUDA/targets/aarch64-linux/lib/
-
-RUN ln -s /usr/local/cuda-$CUDA /usr/local/cuda && \
-    ln -s /usr/local/cuda-$CUDA/targets/aarch64-linux/include /usr/local/cuda/include && \
-    ln -s /usr/local/cuda-$CUDA/targets/aarch64-linux/lib /usr/local/cuda/lib64
-
-ENV PATH /usr/local/cuda-$CUDA/bin:/usr/local/cuda/bin:${PATH}
-ENV LD_LIBRARY_PATH /usr/local/cuda-$CUDA/targets/aarch64-linux/lib:${LD_LIBRARY_PATH}
-
-RUN ldconfig
-
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES all
-
-CMD ["/bin/bash"]
+RUN chmod -R a+w .
