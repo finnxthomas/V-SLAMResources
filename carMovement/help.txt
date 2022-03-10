@@ -1,0 +1,17 @@
+
+Command line arguments and tags can be done in any order. Only tags are optional.
+
+usage: python carMovement.py -help <args>
+       python carMovement.py -find-people <args>
+
+tags may include:
+-help           Prints program usage and ends program subsequently.
+-find-people	If no people are found in given image, turn on motor. Else, stop car.
+
+<args> include:
+<weights>       Path to .weights files
+<config>        Path to yolo .cfg file
+<labels>        Path to .names file
+<images>        Path to single jpg image or folder containing jpg images. Seperate multiple files or folders by space
+
+Example: python carMovement.py -find_people yolov3.weights yolov3.cfg coco.names imgs/
