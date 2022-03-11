@@ -8,6 +8,10 @@ http://wiki.ros.org/melodic/Installation/Ubuntu
 
 http://wiki.ros.org/catkin/Tutorials/create_a_workspace
 
+**Install RTABMAP**
+
+https://github.com/introlab/rtabmap_ros
+
 **Process for running RTAB-Mapping**
 $ cd ~/catkin_ws
 
