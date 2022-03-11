@@ -13,6 +13,7 @@ http://wiki.ros.org/catkin/Tutorials/create_a_workspace
 https://github.com/introlab/rtabmap_ros
 
 **Process for running RTAB-Mapping**
+
 $ cd ~/catkin_ws
 
 $ source devel/setup.bash
