@@ -1,6 +1,6 @@
 # V-SLAMResources
 
-**Download ROS**
+**Install ROS**
 
 http://wiki.ros.org/melodic/Installation/Ubuntu
 
