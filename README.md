@@ -1,11 +1,9 @@
 # V-SLAMResources
 
 **Download ROS**
-
 http://wiki.ros.org/melodic/Installation/Ubuntu
 
 **Create Catkin Workspace**
-
 http://wiki.ros.org/catkin/Tutorials/create_a_workspace
 
 **Process for running RTAB-Mapping**
