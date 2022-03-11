@@ -44,8 +44,6 @@
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/kdtree/flann.h>
 
-#include <boost/shared_array.hpp>
-
 // Forward declarations
 namespace flann
 {
@@ -97,12 +95,19 @@ namespace pcl
       KdTreeFLANN (bool sorted = true);
 
       /** \brief Copy constructor
-        * \param[in] k the tree to copy into this
+        * \param[in] tree the tree to copy into this
         */
       KdTreeFLANN (const KdTreeFLANN<PointT> &k);
 
+      /** \brief Default desctructor for KdTreeFLANN.
+
+        */
+      
+
+
+
       /** \brief Copy operator
-        * \param[in] k the tree to copy into this
+        * \param[in] tree the tree to copy into this
         */ 
       inline KdTreeFLANN<PointT>&
       operator = (const KdTreeFLANN<PointT>& k)
@@ -114,8 +119,8 @@ namespace pcl
         identity_mapping_ = k.identity_mapping_;
         dim_ = k.dim_;
         total_nr_points_ = k.total_nr_points_;
-        param_k_ = k.param_k_;
-        param_radius_ = k.param_radius_;
+        *(this->param_k_) = *(k.param_k_);
+        *(this->param_radius_) = *(k.param_radius_);
         return (*this);
       }
 
@@ -135,6 +140,8 @@ namespace pcl
         */
       virtual ~KdTreeFLANN ()
       {
+        delete  this->param_k_;
+        delete  this->param_radius_;
         cleanup ();
       }
 
@@ -212,7 +219,7 @@ namespace pcl
       boost::shared_ptr<FLANNIndex> flann_index_;
 
       /** \brief Internal pointer to data. */
-      boost::shared_array<float> cloud_;
+      float* cloud_;
       
       /** \brief mapping between internal and external indices. */
       std::vector<int> index_mapping_;
@@ -227,10 +234,10 @@ namespace pcl
       int total_nr_points_;
 
       /** \brief The KdTree search parameters for K-nearest neighbors. */
-      ::flann::SearchParams param_k_;
+      ::flann::SearchParams *param_k_;
 
       /** \brief The KdTree search parameters for radius search. */
-      ::flann::SearchParams param_radius_;
+      ::flann::SearchParams *param_radius_;
   };
 }
 
